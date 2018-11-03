@@ -3,7 +3,7 @@
   <el-col :span="16" :offset="4">
     <el-card class="contentCard">
 <div class="CreateNewCampaignTable">
-<el-form ref="form" :model="form" label-width="150px">
+<el-form ref="form" :model="form" label-width="155px">
 <el-row :gutter="20">
   <el-col :span="16">
     <el-form-item label="Campaign name">
@@ -61,9 +61,8 @@
     <el-slider
       v-model="form.goalCap"
       range
-      show-stops
       :min=10
-      :max=1000
+      :max=500
       >
     </el-slider>
   </div>
@@ -78,10 +77,26 @@
     </el-row>
     <el-slider
       v-model="form.minPresalePrice"
-      show-stops
       :min=0.001
       :max=1
-      :steps=0.001
+      :step=0.001
+      >
+    </el-slider>
+  </div>
+  </el-form-item>
+
+    <el-form-item label="Mainsale price/licence">
+     <div class="block">
+    <el-row>
+      
+      <h2 style="margin-top:0px">  {{form.minMainsalePrice}} Ethers</h2>
+      
+    </el-row>
+    <el-slider
+      v-model="form.minMainsalePrice"
+      :min=0.001
+      :max=1
+      :step=0.001
       >
     </el-slider>
   </div>
@@ -129,8 +144,9 @@ export default {
         country: "",
         shortDescription: "",
         date: "",
-        goalCap: [10, 15],
+        goalCap: [100, 25],
         minPresalePrice:0.01,
+        minMainsalePrice:0.05,
         type: [],
         longDescription:
           '<h2 style="color: #339966;">Hi there from EthStarter!</h2> <p>&nbsp;</p> <p><span>You can use this space to design and describe your campaign</span></p>'
