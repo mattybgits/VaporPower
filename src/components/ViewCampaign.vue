@@ -59,7 +59,7 @@
       <br>
     <div class="campaignText" v-html="ipfsReturnedData.longDescription"></div>
     
-    <h2>Fund Campaign</h2>
+    <h2>Fund Game Campaign</h2>
   
     <el-input-number :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" v-model="fundingAmount" :precision="2" :step="0.1"></el-input-number> Ether  
     <el-button :disabled="CampaignStatus=='Not Started' || CampaignStatus=='Ended'" @click="fundCurrentCampaign" type="primary">Fund Campaign</el-button>
@@ -228,12 +228,12 @@ export default {
       let currentTime = new Date() / 1000;
       //Has not started. current time less than the start time
       if (currentTime < this.contractReturnedData[1]) {
-        this.CampaignStatus = "Not Started";
+        this.CampaignStatus = "Presale Not Started";
         let timeBetween = this.convertSeconds(
           this.contractReturnedData[1] - currentTime
         );
         this.CampaignStatusTime =
-          "Campaign Starts in " +
+          "Campaign Presale Starts in " +
           timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
@@ -253,7 +253,7 @@ export default {
           this.contractReturnedData[2] - currentTime
         );
         this.CampaignStatusTime =
-          "Campaign ends in " +
+          "Campaign Presale ends in " +
           timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
@@ -270,7 +270,7 @@ export default {
           currentTime - this.contractReturnedData[2]
         );
         this.CampaignStatusTime =
-          "Campaign ended " +
+          "Campaign presale ended " +
           +timeBetween["d"] +
           " days, " +
           timeBetween["h"] +
