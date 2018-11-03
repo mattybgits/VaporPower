@@ -8,8 +8,8 @@
       <strong>Balance:</strong> {{this.$store.state.walletBalance/1000000000000000000}} Ether 
       <hr>
       <router-link to="/">Home</router-link> |
-      <router-link to="/CreateNewCampaign">Create New Campaign</router-link> |
-      <router-link to="/ViewCampaigns">View Campaigns</router-link>
+      <router-link to="/CreateNewCampaign">Create New Game Funding Campaign</router-link> |
+      <router-link to="/ViewCampaigns">View All Game Funding Campaigns</router-link>
        <br>
        <hr class="navBarLine">
   </el-header>

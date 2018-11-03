@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h1>Welcome to EthStarter!</h1>
+    <h1>Welcome to Vapor Market!</h1>
     <br>
     <img alt="Vue logo" src="../assets/trophy-solid.svg" style="width:250px">
     <HelloWorld class="center"/>
