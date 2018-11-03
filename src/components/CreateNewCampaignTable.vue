@@ -6,16 +6,13 @@
 <el-form ref="form" :model="form" label-width="155px">
 <el-row :gutter="20">
   <el-col :span="16">
-    <el-form-item label="Campaign name">
+    <el-form-item label="Game name">
     <el-input v-model="form.name"></el-input>
-  </el-form-item>
-  <el-form-item label="Campaign Country">
-    <el-input v-model="form.country"></el-input>
   </el-form-item>
   <el-form-item label="Short Description">
         <el-input type="textarea" v-model="form.shortDescription"></el-input>
   </el-form-item>
-  <el-form-item label="Start and End date">
+  <el-form-item label="Presale dates">
      <div class="block">
     <el-date-picker
       v-model="form.date"
@@ -42,13 +39,20 @@
   <el-row>
     <el-col :span="24">
 
-<el-form-item label="Campaign Type">
+<el-form-item label="Game type">
     <el-checkbox-group v-model="form.type">
-      <el-checkbox label="Charity Fund Raising" name="type"></el-checkbox>
-      <el-checkbox label="Community Initiative" name="type"></el-checkbox>
-      <el-checkbox label="Personal Funding" name="type"></el-checkbox>
-      <el-checkbox label="Project Kickstater" name="type"></el-checkbox>
-      <el-checkbox label="Opensource Funding" name="type"></el-checkbox>
+      <el-checkbox label="Massively Multiplayer Online" name="type"></el-checkbox>
+      <el-checkbox label="Simulation" name="type"></el-checkbox>
+      <el-checkbox label="Adventure" name="type"></el-checkbox>
+      <el-checkbox label="Real-Time Strategy" name="type"></el-checkbox>
+      <el-checkbox label="Puzzle" name="type"></el-checkbox>
+      <el-checkbox label="Action" name="type"></el-checkbox>
+      <el-checkbox label="Stealth Shooter" name="type"></el-checkbox>
+      <el-checkbox label="Combat" name="type"></el-checkbox>
+      <el-checkbox label="First Person Shooters" name="type"></el-checkbox>
+      <el-checkbox label="Sports" name="type"></el-checkbox>
+      <el-checkbox label="Role-Playing" name="type"></el-checkbox>
+      <el-checkbox label="Educational" name="type"></el-checkbox>
     </el-checkbox-group>
   </el-form-item>
   <el-form-item label="Presale Goal and Cap">
@@ -141,7 +145,6 @@ export default {
       form: {
         imageData: "",
         name: "",
-        country: "",
         shortDescription: "",
         date: "",
         goalCap: [100, 25],

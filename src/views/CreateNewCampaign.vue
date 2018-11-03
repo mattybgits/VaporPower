@@ -1,6 +1,6 @@
 <template>
   <div class="CreateNewCampaign">
-    <h1> Create a new Campaign</h1>
+    <h1> Create a Game funding campaign</h1>
       <CreateNewCampaignTable/>
   </div>
 </template>
