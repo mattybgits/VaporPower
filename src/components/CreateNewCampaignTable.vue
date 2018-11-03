@@ -51,7 +51,7 @@
       <el-checkbox label="Opensource Funding" name="type"></el-checkbox>
     </el-checkbox-group>
   </el-form-item>
-  <el-form-item label="Goal and Cap">
+  <el-form-item label="Presale Goal and Cap">
      <div class="block">
     <el-row>
       
@@ -62,6 +62,26 @@
       v-model="form.goalCap"
       range
       show-stops
+      :min=10
+      :max=1000
+      >
+    </el-slider>
+  </div>
+  </el-form-item>
+  
+  <el-form-item label="Presale price/licence">
+     <div class="block">
+    <el-row>
+      
+      <h2 style="margin-top:0px">  {{form.minPresalePrice}} Ethers</h2>
+      
+    </el-row>
+    <el-slider
+      v-model="form.minPresalePrice"
+      show-stops
+      :min=0.001
+      :max=1
+      :steps=0.001
       >
     </el-slider>
   </div>
@@ -110,6 +130,7 @@ export default {
         shortDescription: "",
         date: "",
         goalCap: [10, 15],
+        minPresalePrice:0.01,
         type: [],
         longDescription:
           '<h2 style="color: #339966;">Hi there from EthStarter!</h2> <p>&nbsp;</p> <p><span>You can use this space to design and describe your campaign</span></p>'
