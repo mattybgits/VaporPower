@@ -32,7 +32,6 @@ contract CampaignManager is Ownable, Proxy{
         uint endingTime;
         uint balance;
         uint goal;
-        uint cap;
         State state;
         mapping(address=>int[]) doners;
         address[] donersAddresses;
@@ -63,19 +62,6 @@ contract CampaignManager is Ownable, Proxy{
     modifier validNewCampaignTime(uint _startingTime,uint _endingTime){
         require(_startingTime >= now, "Firstly, Start time must be larger than the current time");
         require(_endingTime > _startingTime,"Secondly, the end time should be more than the starting time");
-        _;
-    }
-    
-    /**
-    * @dev Verify the goals and cap for the campaign are valid
-    * @notice if the cap is set to zero, it is uncapped
-    * @param _goal value of the campaign (in ETH)
-    * @param _cap value of the campaign (in ETH)
-    */
-    modifier validNewCampaignFunding(uint _goal,uint _cap) {
-        if(_cap != 0){
-            require(_cap > _goal, "Cap should be larger than goal to be valid");
-        }
         _;
     }
     
@@ -143,18 +129,6 @@ contract CampaignManager is Ownable, Proxy{
     */
     modifier campaignNotFunded(uint _campaignID){
         require(campaigns[_campaignID].state != State.Funded,"The state of the campaign must be not funded to define an unfunded campaign");
-        _;
-    }
-    
-    /**
-    * @dev Verify that the donation will not cause the campaign to exceed its cap
-    * @notice this function takes into account the current balance and the donation
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignWillNotExceedCap(uint _campaignID) {
-        require(
-            campaigns[_campaignID].balance + msg.value <= campaigns[_campaignID].cap, 
-            "The value of the donation + the current balance of the fund must be less than the cap to not exceed the cap");
         _;
     }
     
@@ -262,19 +236,16 @@ contract CampaignManager is Ownable, Proxy{
     * @param _startingTime unix time stamp of when the campaign will start
     * @param _endingTime unix time stamp of when the campaign will end
     * @param _goal value of the campaign (in ETH).
-    * @param _cap value of the campaign (in ETH)
     * @param _ipfsHash represents the campain information on IPFS in a hash
     */
     function createCampaign(
         uint _startingTime, 
         uint _endingTime, 
         uint _goal, 
-        uint _cap, 
         string _ipfsHash
     ) 
         public
         validNewCampaignTime(_startingTime,_endingTime)
-        validNewCampaignFunding(_goal,_cap)
         emergencyStop_Creation
         returns(uint)
     {
@@ -285,7 +256,6 @@ contract CampaignManager is Ownable, Proxy{
             endingTime: _endingTime,
             balance: 0,
             goal: _goal,
-            cap: _cap,
             state: State.NotStarted,
             donersAddresses: emptydonersAddresses,
             ipfsHash: _ipfsHash
@@ -296,7 +266,7 @@ contract CampaignManager is Ownable, Proxy{
     
     /**
     * @dev Enable anyone to donate to a campaign. The campaign must have started,
-    * have not finished and not exceeded it's cap to be able to deposit.
+    * have not finished.
     * @notice this changes the state of a campaign from NotStarted -> Running
     * @param _campaignID unique identifer of the campaign
     */
@@ -305,7 +275,6 @@ contract CampaignManager is Ownable, Proxy{
         payable
         campaignHasStarted(_campaignID)
         campaignHasNotEnded(_campaignID)
-        campaignWillNotExceedCap(_campaignID)
         emergencyStop_Funding
     {
         campaigns[_campaignID].balance += msg.value;
@@ -418,7 +387,6 @@ contract CampaignManager is Ownable, Proxy{
         uint endingTime,
         uint balance,
         uint goal,
-        uint cap,
         State state,
         address[] donersAddresses,
         string ipfsHash)
@@ -428,10 +396,9 @@ contract CampaignManager is Ownable, Proxy{
         endingTime = campaigns[_campaignID].endingTime;
         balance = campaigns[_campaignID].balance;
         goal = campaigns[_campaignID].goal;
-        cap = campaigns[_campaignID].cap;
         state = campaigns[_campaignID].state;
         donersAddresses = campaigns[_campaignID].donersAddresses;
         ipfsHash = campaigns[_campaignID].ipfsHash;
-        return (manager, startingTime, endingTime, balance, goal, cap, state, donersAddresses, ipfsHash);
+        return (manager, startingTime, endingTime, balance, goal, state, donersAddresses, ipfsHash);
     }
 }
