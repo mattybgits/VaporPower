@@ -174,13 +174,17 @@ export default {
       let createdAddress = await uploadFile(this.form);
       let startTime = Math.floor(Date.parse(this.form.date[0]) / 1000);
       let endTime = Math.floor(Date.parse(this.form.date[1]) / 1000);
-      let goal = this.form.goalCap[0];
-      let cap = this.form.goalCap[1];
+      let presaleGoal = this.form.goalCap[0];
+      let presaleCap = this.form.goalCap[1];
+      let presaleCostPerToken = this.form.minPresalePrice;
+      let mainSaleCostPerToken = this.minMainsalePrice;
       let campaignTx = await createNewCampaign(
         startTime,
         endTime,
-        goal,
-        cap,
+        presaleGoal,
+        presaleCap,
+        presaleCostPerToken,
+        mainSaleCostPerToken,
         createdAddress
       );
     },
