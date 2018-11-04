@@ -26,8 +26,7 @@ const createNewCampaign = async (_startingTime, _endingTime, _goal, _ipfsHash, _
         _goal * 1000000000000000000,
         _ipfsHash,
         _presalePrice * 1000000000000000000,
-        _postsalePrice * 1000000000000000000,
-        {
+        _postsalePrice * 1000000000000000000, {
             from: store.state.defaultEthWallet,
             gasPrice: 2000000000,
             gas: '2000000'
@@ -76,6 +75,10 @@ const fetchCampaign = async (_campaignID) => {
     return await contractInstance.fetchCampaign(_campaignID)
 }
 
+const validateLicence = async (_campaignID) => {
+    return await contractInstance.fetchCampaignLicenses(_campaignID, store.state.defaultEthWallet)
+}
+
 export {
     loadCampaignManager,
     createNewCampaign,
@@ -84,5 +87,6 @@ export {
     reduceDonation,
     refundFailedCampaign,
     withdrawCampaignFunds,
-    fetchCampaign
+    fetchCampaign,
+    validateLicence
 }

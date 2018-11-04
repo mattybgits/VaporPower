@@ -9,7 +9,8 @@
       <hr>
       <router-link to="/">Home</router-link> |
       <router-link to="/CreateNewCampaign">Create New Game Funding Campaign</router-link> |
-      <router-link to="/ViewCampaigns">View All Game Funding Campaigns</router-link>
+      <router-link to="/ViewCampaigns">View All Game Funding Campaigns</router-link> | 
+      <router-link to="/ValidateLicence">Validate Licence</router-link>
        <br>
        <hr class="navBarLine">
   </el-header>
