@@ -202,7 +202,7 @@ export default {
 
       this.tableData = [
         { propery: "Funding Period", value: this.date },
-        { propery: "Presale Goal", value: this.ipfsReturnedData.goalCap + " Ether" },
+        { propery: "Presale Goal", value: this.ipfsReturnedData.presaleGoal + " Ether" },
         { propery: "Presale Price", value: this.ipfsReturnedData.minPresalePrice + " Ether" },
         { propery: "Mainsale Price", value: this.ipfsReturnedData.minMainsalePrice + " Ether" },
         { propery: "Type", value: type },
@@ -211,9 +211,9 @@ export default {
         { propery: "Funders", value: fundersString }
       ];
       this.goalPercentage = parseInt(
-        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.goalCap[0] * 100 / 1000000000000000000);
+        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.presaleGoal * 100 / 1000000000000000000);
       this.capPercentage = parseInt(
-        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.goalCap[1] * 100 / 1000000000000000000);
+        this.contractReturnedData[3]["c"][0]/10000 / this.ipfsReturnedData.presaleGoal * 100 / 1000000000000000000);
     },
     convertSeconds(seconds) {
       var d, h, m, s;
