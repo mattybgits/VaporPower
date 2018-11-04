@@ -35,6 +35,7 @@ contract CampaignManager is Ownable, Proxy{
         string ipfsHash;
         uint presalePrice;
         uint postsalePrice;
+        mapping(address => uint) licenses;
     }
     
     /** @dev store the total number of campaigns. Useful for retreving all of them **/
@@ -187,19 +188,19 @@ contract CampaignManager is Ownable, Proxy{
         _;
     }
 
-    /**
-    * @dev Checks funding value
-    */
-    modifier validPrice(uint _campaignID){
-        if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
-            require(msg.value >= campaigns[_campaignID].presalePrice, "The value needs to exceed the presale price");
-        } else if (campaigns[_campaignID].balance >= campaigns[_campaignID].goal) {
-            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
-        } else if (campaigns[_campaignID].endingTime >= now) {
-            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
-        }
-        _;
-    }
+    // /**
+    // * @dev Checks funding value
+    // */
+    // modifier validPrice(uint _campaignID){
+    //     if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
+    //         require(msg.value >= campaigns[_campaignID].presalePrice, "The value needs to exceed the presale price");
+    //     } else if (campaigns[_campaignID].balance >= campaigns[_campaignID].goal) {
+    //         require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
+    //     } else if (campaigns[_campaignID].endingTime >= now) {
+    //         require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
+    //     }
+    //     _;
+    // }
 
     /**
     * @dev Checks whether the presale is over
@@ -228,6 +229,22 @@ contract CampaignManager is Ownable, Proxy{
         onlyOwner
     {
         emergencyStop_stopFunding = true;
+    }
+    
+    function currentPrice(uint _campaignID) internal view returns(uint){
+        uint price;
+        if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
+            price = campaigns[_campaignID].presalePrice;
+        } else if (campaigns[_campaignID].balance >= campaigns[_campaignID].goal) {
+            price = campaigns[_campaignID].postsalePrice;
+        } else if (campaigns[_campaignID].endingTime >= now) {
+            price = campaigns[_campaignID].postsalePrice;
+        }
+        return price;
+    }
+
+    function computeLicenses(uint _value, uint _price) internal pure returns(uint) {
+        return _value / _price;
     }
     
     /**
@@ -277,18 +294,17 @@ contract CampaignManager is Ownable, Proxy{
         public
         payable
         campaignHasStarted(_campaignID)
-        validPrice(_campaignID)
+        // validPrice(_campaignID)
         emergencyStop_Funding
     {
+        uint price = currentPrice(_campaignID);
+        require(msg.value >= price, "value sent is too low");
         campaigns[_campaignID].balance += msg.value;
         // Need to implicity typecast the msg.value for as donars can be
         // negative when withdrawing
         campaigns[_campaignID].doners[msg.sender].push(int(msg.value));
-        // There is no point in storing a doners address multiple times in the
-        //donersAddresses array so only add if you this is your first contribution
-        // if(campaigns[_campaignID].doners[msg.sender].length==0){
         campaigns[_campaignID].donersAddresses.push(msg.sender);         
-        // }
+        campaigns[_campaignID].licenses[msg.sender] += computeLicenses(msg.value, price);
     }
     
     /**
@@ -373,5 +389,10 @@ contract CampaignManager is Ownable, Proxy{
         presalePrice = campaigns[_campaignID].presalePrice;
         postsalePrice = campaigns[_campaignID].postsalePrice;
         return (manager, startingTime, endingTime, balance, goal, donersAddresses, ipfsHash, presalePrice, postsalePrice);
+    }
+
+    function fetchCampaignLicenses(uint _campaignID, address _donor) public view returns(uint licenses) {
+        licenses = campaigns[_campaignID].licenses[_donor];
+        return licenses;
     }
 }

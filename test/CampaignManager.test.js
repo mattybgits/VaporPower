@@ -33,8 +33,8 @@ contract('CampaignManager', function (accounts) {
     const validDonation = ether(5);
     const goal = ether(50)
     const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
-    const presalePrice = 1;
-    const postsalePrice = 2;
+    const presalePrice = ether(4);
+    const postsalePrice = ether(6);
 
 
     before(async function () {
@@ -80,8 +80,8 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[4]['c'][0], goal['c'][0], "Goal should be set correctly")
         assert.equal(campaignValues[5].length, 0, "There should be no contributers")
         assert.equal(campaignValues[6], ipfsHash, "IPFS hash should be correct")
-        assert.equal(campaignValues[7], presalePrice, "presalePrice hash should be correct")
-        assert.equal(campaignValues[8], postsalePrice, "postsalePrice hash should be correct")
+        assert.equal(campaignValues[7]['c'][0], presalePrice['c'][0], "presalePrice should be correct")
+        assert.equal(campaignValues[8]['c'][0], postsalePrice['c'][0], "postsalePrice should be correct")
 
         //check that if the start time is after the end time (swapped start and end times) constructor throws
         await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, ipfsHash, presalePrice, postsalePrice, {
@@ -128,6 +128,17 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
         assert.equal(campaignValues[5].length, 1, "There should be 1 funder")
         assert.equal(campaignValues[5][0], funder1, "Only Funder address should be funder1")
+
+        let campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
+        assert.equal(campaignLicenses, 1, "Funder 1 has one license")
+
+        await campaignManager.fundCampaign(campaignID, {
+            from: funder1,
+            value: validDonation
+        })
+        campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
+        assert.equal(campaignLicenses, 2, "Funder 1 has two license")
+
 
         // // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
         // await increaseTimeTo(afterEndingTime);
