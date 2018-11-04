@@ -210,6 +210,18 @@ contract CampaignManager is Ownable, Proxy{
         require(emergencyStop_stopFunding == false, "The emergency stop funding is active");
         _;
     }
+
+    /**
+    * @dev Checks funding value
+    */
+    modifier validPrice(uint _campaignID){
+        if (campaigns[_campaignID].state == State.Running) {
+            require(msg.value >= campaigns[_campaignID].presalePrice, "The value needs to exceed the presale price");
+        } else if (campaigns[_campaignID].state == State.Funded || campaigns[_campaignID].state == State.UnderFunded) {
+            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the presale price");
+        }
+        _;
+    }
     
      /** @dev Assign owner and reset campaign */
     constructor() 
@@ -280,7 +292,7 @@ contract CampaignManager is Ownable, Proxy{
         public
         payable
         campaignHasStarted(_campaignID)
-        campaignHasNotEnded(_campaignID)
+        validPrice(_campaignID)
         emergencyStop_Funding
     {
         campaigns[_campaignID].balance += msg.value;
