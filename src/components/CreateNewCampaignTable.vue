@@ -37,7 +37,7 @@
 </el-row>
 
   <el-row>
-    <el-col :span="24">
+    <el-col class="text-center" :span="24">
 
 <el-form-item label="Game type">
     <el-checkbox-group v-model="form.type">
@@ -55,16 +55,15 @@
       <el-checkbox label="Educational" name="type"></el-checkbox>
     </el-checkbox-group>
   </el-form-item>
-  <el-form-item label="Presale Goal and Cap">
+  <el-form-item label="Presale Goal">
      <div class="block">
     <el-row>
       
-      <h2 style="margin-top:0px">  {{form.goalCap[0]}} <i class="el-icon-arrow-right"></i> {{form.goalCap[1]}} Ethers</h2>
+      <h2 style="margin-top:0px"> {{form.presaleGoal}} Ethers</h2>
       
     </el-row>
     <el-slider
-      v-model="form.goalCap"
-      range
+      v-model="form.presaleGoal"
       :min=10
       :max=500
       >
@@ -147,7 +146,7 @@ export default {
         name: "",
         shortDescription: "",
         date: "",
-        goalCap: [100, 25],
+        presaleGoal: 100,
         minPresalePrice:0.01,
         minMainsalePrice:0.05,
         type: [],
@@ -174,15 +173,13 @@ export default {
       let createdAddress = await uploadFile(this.form);
       let startTime = Math.floor(Date.parse(this.form.date[0]) / 1000);
       let endTime = Math.floor(Date.parse(this.form.date[1]) / 1000);
-      let presaleGoal = this.form.goalCap[0];
-      let presaleCap = this.form.goalCap[1];
+      let presaleGoal = this.form.presaleGoal;
       let presaleCostPerToken = this.form.minPresalePrice;
       let mainSaleCostPerToken = this.minMainsalePrice;
       let campaignTx = await createNewCampaign(
         startTime,
         endTime,
         presaleGoal,
-        presaleCap,
         presaleCostPerToken,
         mainSaleCostPerToken,
         createdAddress
