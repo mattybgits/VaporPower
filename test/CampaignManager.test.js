@@ -139,14 +139,6 @@ contract('CampaignManager', function (accounts) {
         campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
         assert.equal(campaignLicenses, 3, "Funder 1 does not have 3 licenses")
 
-
-        // // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
-        // await increaseTimeTo(afterEndingTime);
-
-        // await expectThrow(campaignManager.fundCampaign(campaignID, {
-        //     from: funder1,
-        //     value: validDonation
-        // }), EVMRevert);
     })
     it('Reduce Donation should only alow valid inputs', async () => {
         // First, we need a campaign to test against

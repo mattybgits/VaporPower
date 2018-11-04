@@ -84,29 +84,11 @@ contract CampaignManager is Ownable, Proxy{
     }
 
     /**
-    * @dev checks if the campain has ended (current time more than end time)
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignEnded(uint _campaignID){
-        require(now > campaigns[_campaignID].endingTime, "Current time must be bigger than the end time for the campaign to have ended");
-        _;
-    }
-
-    /**
     * @dev Verify the current time is not past the end time of the camaign
     * @param _campaignID unique identifer of the campaign
     */
     modifier campaignHasNotEnded(uint _campaignID) {
         require(now < campaigns[_campaignID].endingTime, "Current time must be less than the end time for the campaign to have not ended");
-        _;
-    }
-    
-    /**
-    * @dev checks if the campain has Succeeded (donation > than goal)
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignSucceeded(uint _campaignID){
-        require(campaigns[_campaignID].balance > campaigns[_campaignID].goal, "The balance of the campaign must be more than the goal");
         _;
     }
 
@@ -188,20 +170,6 @@ contract CampaignManager is Ownable, Proxy{
         _;
     }
 
-    // /**
-    // * @dev Checks funding value
-    // */
-    // modifier validPrice(uint _campaignID){
-    //     if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
-    //         require(msg.value >= campaigns[_campaignID].presalePrice, "The value needs to exceed the presale price");
-    //     } else if (campaigns[_campaignID].balance >= campaigns[_campaignID].goal) {
-    //         require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
-    //     } else if (campaigns[_campaignID].endingTime >= now) {
-    //         require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
-    //     }
-    //     _;
-    // }
-
     /**
     * @dev Checks whether the presale is over
     */
@@ -231,6 +199,12 @@ contract CampaignManager is Ownable, Proxy{
         emergencyStop_stopFunding = true;
     }
     
+    /**
+    * @dev Returns the current price based on the progress of the campaign. If the goal 
+    * and end time have not been met, it returns the presale price, otherwise it returns
+    * the postsale Price
+    * @param _campaignID unique identifer of the campaign
+    */
     function currentPrice(uint _campaignID) internal view returns(uint){
         uint price;
         if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
@@ -243,13 +217,18 @@ contract CampaignManager is Ownable, Proxy{
         return price;
     }
 
+    /**
+    * @dev Computes the number of licenses given a value sent and the current price
+    * @notice uint division defaults to floor
+    * @param _value value sent to the contract
+    * @param _price current price of the item
+    */
     function computeLicenses(uint _value, uint _price) internal pure returns(uint) {
         return _value / _price;
     }
     
     /**
     * @dev Generate a new campaign struct and store it. Assign manager and values
-    * @notice this sets the inital value of the State to NotStarted
     * @param _startingTime unix time stamp of when the campaign will start
     * @param _endingTime unix time stamp of when the campaign will end
     * @param _goal value of the campaign (in ETH).
