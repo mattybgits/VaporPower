@@ -109,28 +109,7 @@ contract CampaignManager is Ownable, Proxy{
         _;
     }
 
-    /**
-    * @dev checks if the campain has failed (donation < than goal)
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignUnsuccessful(uint _campaignID) {
-        require(now > campaigns[_campaignID].endingTime,"The campaign must have ended firstly to check if a campaign is unsuccessful");
-        require(
-            campaigns[_campaignID].balance < campaigns[_campaignID].goal,
-            "Secondly, the campaign must have a balance less than the goal to be unsuccessful");
-        _;
-    }
 
-    // /**
-    // * @dev checks if a campain has been funded, and therefore paid out. 
-    // * @notice This assertion prevents manager's from withdrawing twice from a fund.
-    // * @param _campaignID unique identifer of the campaign
-    // */
-    // modifier campaignNotFunded(uint _campaignID){
-    //     require(campaigns[_campaignID].state != State.Funded,"The state of the campaign must be not funded to define an unfunded campaign");
-    //     _;
-    // }
-    
     /**
     * @dev Verify that the donation will not cause the campaign to drop below
     * its goal. This prevents someone from making a campaign that would succeed,
@@ -346,41 +325,13 @@ contract CampaignManager is Ownable, Proxy{
     function withdrawCampaignFunds(uint _campaignID)
         public
         onlyManager(_campaignID)
-        campaignEnded(_campaignID)
-        // campaignSucceeded(_campaignID)
-        // campaignNotFunded(_campaignID)
+        PresaleOver(_campaignID)
     {
         // Note that we dont have to change the balance of the campaign as we
         // prevent double withdraws by checking the state of the campaign. 
         // Leaving the balance within the campaign enables an easy way to sender
         // the total funds sent to the campaign.
         msg.sender.transfer(campaigns[_campaignID].balance);
-    }
-    
-    /**
-    * @dev Enables someone who contributed to a failed campaign to get back 
-    * their contributions back. This is a sum of all their contributions
-    * period is finished. 
-    * @notice The campaign state changes from Running -> Failed
-    * @param _campaignID unique identifer of the campaign
-    */
-    function refundFailedCampaign(uint _campaignID)
-        public
-        onlyContributer(_campaignID)
-        campaignEnded(_campaignID)
-        campaignUnsuccessful(_campaignID)
-    {
-        uint totalContributed = 0;
-        for (uint i = 0;i < campaigns[_campaignID].doners[msg.sender].length; i++){
-            totalContributed += uint(campaigns[_campaignID].doners[msg.sender][i]);
-        }
-        // Take away their whole contribution from their profile. This means
-        // that if they try redraw again the sum total == 0. The require is here
-        // to ensure that if the user calls again the function will not preform
-        // a transaction of 0 ether and will throw
-        require(totalContributed > 0, "The total contribution for the user should be positive");
-        campaigns[_campaignID].doners[msg.sender].push(-int(totalContributed));
-        msg.sender.transfer(totalContributed);
     }
 
     /**

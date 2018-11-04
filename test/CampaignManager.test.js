@@ -31,7 +31,7 @@ contract('CampaignManager', function (accounts) {
     const funder1 = accounts[2];
     const funder2 = accounts[3];
     const validDonation = ether(5);
-    const goal = ether(10)
+    const goal = ether(50)
     const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
     const presalePrice = 1;
     const postsalePrice = 2;
@@ -173,11 +173,11 @@ contract('CampaignManager', function (accounts) {
         // campaign fail. After this funding, the fund should have a value of 12.5 eth. This is more than the goal but less than the cap
         await campaignManager.fundCampaign(campaignID, {
             from: funder2,
-            value: validDonation * 2
+            value: validDonation * 10
         })
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
+        assert.equal(campaignValues[3]['c'][0], ether(52.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
 
         // Now get funder2 to try and withdraw more than 2.5 ether, making the balance of the fund < the goal of 10. This should throw as you
         // cant make a sucesseeding campaign fail with a withdraw
@@ -186,7 +186,7 @@ contract('CampaignManager', function (accounts) {
         }), EVMRevert);
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[3]['c'][0], ether(12.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
+        assert.equal(campaignValues[3]['c'][0], ether(52.5)['c'][0], "Balance should be equal to the total deposited + the amount withdrawn")
 
         // Last thing to check is that a doner cant withdraw after the campaign has finished
         await increaseTimeTo(afterEndingTime);
@@ -235,44 +235,6 @@ contract('CampaignManager', function (accounts) {
         // Ensure that the manager can't withdraw twice from the same campaign
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
             from: manager
-        }), EVMRevert);
-    })
-
-    it('Refund Failed Campaign should only alow valid inputs', async () => {
-        // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
-            from: manager
-        })
-        //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
-        let campaignID = await campaignManager.campaignCount() - 1
-
-        // Set time to during the campaign and then try fund it.
-        await increaseTimeTo(duringCampaignTime);
-        await campaignManager.fundCampaign(campaignID, {
-            from: funder1,
-            value: validDonation * 1.5 //we want to fund the campaign such that it is below the goal. 1.5* validDonation = 7.5eth
-        })
-
-        let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[3]['c'][0], validDonation['c'][0] * 1.5, "Balance should be equal to the donation amount")
-
-
-        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-
-        //Should not be able to call this until the campaign has ended so check that it reverts
-        await expectThrow(campaignManager.refundFailedCampaign(campaignID, {
-            from: funder1
-        }), EVMRevert);
-
-        await increaseTimeTo(afterEndingTime);
-
-        await campaignManager.refundFailedCampaign(campaignID, {
-            from: funder1
-        })
-
-        // Lastly, check that the user cant withdraw failed funds for a second time
-        await expectThrow(campaignManager.refundFailedCampaign(campaignID, {
-            from: funder1
         }), EVMRevert);
     })
 
