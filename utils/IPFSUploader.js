@@ -29,6 +29,8 @@ const uploadFile = async _content => {
 
 const viewFile = async c => {
   const fileBuffer = await ipfs.files.cat(c);
+  console.log("FILE VIEW")
+  console.log(fileBuffer)
   return JSON.parse(fileBuffer.toString());
 };
 

@@ -144,7 +144,10 @@ export default {
       // Note that this subindexing should potentually be done in the campaign manager interface
       // but this extra seperation of conserns will make the process less efficiant. Coupling of layers
       // is worth it here until I can think of a better way to do it while keeping effecient
-      this.ipfsReturnedData = await viewFile(this.contractReturnedData[8]);
+      console.log("Contract data")
+      console.log(this.contractReturnedData)
+      this.ipfsReturnedData = await viewFile(this.contractReturnedData[7]);
+      console.log(ipfsReturnedData)
       //update the display for the time every second
       setInterval(
         function() {
