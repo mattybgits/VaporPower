@@ -32,8 +32,9 @@ contract('CampaignManager', function (accounts) {
     const funder2 = accounts[3];
     const validDonation = ether(5);
     const goal = ether(10)
-    const cap = ether(15)
     const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
+    const presalePrice = 1;
+    const postsalePrice = 2;
 
 
     before(async function () {
@@ -59,7 +60,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Create Campaign only allows valid inputs', async () => {
         // Valid inputs should add a new entry to the array
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         let campaignCount = await campaignManager.campaignCount()
@@ -77,13 +78,14 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[2]['c'][0], endingTime, "Manager should have been set")
         assert.equal(campaignValues[3]['c'][0], 0, "Balance should be zero")
         assert.equal(campaignValues[4]['c'][0], goal['c'][0], "Goal should be set correctly")
-        assert.equal(campaignValues[5]['c'][0], cap['c'][0], "cap should be set correctly")
-        assert.equal(campaignValues[6]['c'][0], 0, "State should be set to not started(0)")
-        assert.equal(campaignValues[7].length, 0, "There should be no contributers")
-        assert.equal(campaignValues[8], ipfsHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[5]['c'][0], 0, "State should be set to not started(0)")
+        assert.equal(campaignValues[6].length, 0, "There should be no contributers")
+        assert.equal(campaignValues[7], ipfsHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[8], presalePrice, "presalePrice hash should be correct")
+        assert.equal(campaignValues[9], postsalePrice, "postsalePrice hash should be correct")
 
         //check that if the start time is after the end time (swapped start and end times) constructor throws
-        await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, cap, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
 
@@ -91,12 +93,7 @@ contract('CampaignManager', function (accounts) {
         // the construction of a new campaign should still thow
         startingTime = 100
         endingTime = 150
-        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
-            from: manager
-        }), EVMRevert);
-
-        // lastly, check the goal/cap modifier to prevent the cap>goal
-        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, cap, goal, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
 
@@ -108,7 +105,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Funding Campaign only allows valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -130,15 +127,9 @@ contract('CampaignManager', function (accounts) {
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
 
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
-        assert.equal(campaignValues[6]['c'][0], 1, "State should be set to Started(1)")
-        assert.equal(campaignValues[7].length, 1, "There should be 1 funder")
-        assert.equal(campaignValues[7][0], funder1, "Only Funder address should be funder1")
-
-        // We need to check that if the funder addes enough to exceed the cap, it fails. At this point, we are at 5 ether in the fund
-        await expectThrow(campaignManager.fundCampaign(campaignID, {
-            from: funder1,
-            value: cap //This value doesent matter as long as it + the current balance is > than cap. just use cap to keep it simple
-        }), EVMRevert);
+        assert.equal(campaignValues[5]['c'][0], 1, "State should be set to Started(1)")
+        assert.equal(campaignValues[6].length, 1, "There should be 1 funder")
+        assert.equal(campaignValues[6][0], funder1, "Only Funder address should be funder1")
 
         // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
         await increaseTimeTo(afterEndingTime);
@@ -150,7 +141,7 @@ contract('CampaignManager', function (accounts) {
     })
     it('Reduce Donation should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -209,7 +200,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Withdraw Campaign Funds should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -244,7 +235,7 @@ contract('CampaignManager', function (accounts) {
         });
 
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[6]['c'][0], 2, "State should be set to Funded(2)")
+        assert.equal(campaignValues[5]['c'][0], 2, "State should be set to Funded(2)")
 
         // Ensure that the manager can't withdraw twice from the same campaign
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
@@ -254,7 +245,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Refund Failed Campaign should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -292,7 +283,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Update IPFS Hash should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         // The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -304,7 +295,7 @@ contract('CampaignManager', function (accounts) {
             from: manager
         })
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[8], newHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[7], newHash, "IPFS hash should be correct")
 
         let mollyHash = "BAD HASH"
         // Someone who is NOT the manager should not be able to change the hash
@@ -312,7 +303,7 @@ contract('CampaignManager', function (accounts) {
             from: funder1
         }), EVMRevert);
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[8], newHash, "IPFS hash should NOT have changed from the one set by the manager")
+        assert.equal(campaignValues[7], newHash, "IPFS hash should NOT have changed from the one set by the manager")
 
         // Lastly check that the hash cant be changed after the campain has started
         await increaseTimeTo(duringCampaignTime);
@@ -323,7 +314,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Emergency Stops should stop associated functionality', async () => {
         // Standard creation of a campaign should be fine
-        await campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
 
@@ -341,7 +332,7 @@ contract('CampaignManager', function (accounts) {
         await campaignManager.enableEmergencyStop_Creation({
             from: owner
         })
-        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, cap, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
     })
