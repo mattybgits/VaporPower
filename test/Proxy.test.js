@@ -32,6 +32,8 @@ contract('ProxyContract', function (accounts) {
     const mollyImplementationAddress = "0x703103cc1eEcF5cfcaf44Eaf8752bb9504526A76";
     const goal = ether(10)
     const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
+    const presalePrice = 1;
+    const postsalePrice = 2;
     
     before(async function () {
         const startingTime = (await latestTime()) + duration.weeks(1);
@@ -76,7 +78,7 @@ contract('ProxyContract', function (accounts) {
         let proxyCampaignManager = await CampaignManager.at(proxy.address)
 
         //Create the campaign, from the interface of the proxy
-        await proxyCampaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash)
+        await proxyCampaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice)
 
         //read back the number of campaigns created to check that the call was forwared correctly
         let numberOfCampaigns = await proxyCampaignManager.campaignCount()
@@ -115,7 +117,7 @@ contract('ProxyContract', function (accounts) {
         // use on unassigned proxies.
         let proxyCampaignManager = await CampaignManager.at(proxy.address)
 
-        await expectThrow(proxyCampaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash),EVMRevert)
+        await expectThrow(proxyCampaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice),EVMRevert)
     });
 
     // it('Proxy should correctly return a revert if the implementation contract also reverts', async () => {

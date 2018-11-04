@@ -36,6 +36,8 @@ contract CampaignManager is Ownable, Proxy{
         mapping(address=>int[]) doners;
         address[] donersAddresses;
         string ipfsHash;
+        uint presalePrice;
+        uint postsalePrice;
     }
     
     /** @dev store the total number of campaigns. Useful for retreving all of them **/
@@ -242,7 +244,9 @@ contract CampaignManager is Ownable, Proxy{
         uint _startingTime, 
         uint _endingTime, 
         uint _goal, 
-        string _ipfsHash
+        string _ipfsHash,
+        uint _presalePrice,
+        uint _postsalePrice
     ) 
         public
         validNewCampaignTime(_startingTime,_endingTime)
@@ -258,7 +262,9 @@ contract CampaignManager is Ownable, Proxy{
             goal: _goal,
             state: State.NotStarted,
             donersAddresses: emptydonersAddresses,
-            ipfsHash: _ipfsHash
+            ipfsHash: _ipfsHash,
+            presalePrice: _presalePrice,
+            postsalePrice: _postsalePrice
         });
         campaignCount += 1;
         return campaignCount;
@@ -389,7 +395,9 @@ contract CampaignManager is Ownable, Proxy{
         uint goal,
         State state,
         address[] donersAddresses,
-        string ipfsHash)
+        string ipfsHash,
+        uint presalePrice,
+        uint postsalePrice)
     {
         manager = campaigns[_campaignID].manager;
         startingTime = campaigns[_campaignID].startingTime;
@@ -399,6 +407,8 @@ contract CampaignManager is Ownable, Proxy{
         state = campaigns[_campaignID].state;
         donersAddresses = campaigns[_campaignID].donersAddresses;
         ipfsHash = campaigns[_campaignID].ipfsHash;
-        return (manager, startingTime, endingTime, balance, goal, state, donersAddresses, ipfsHash);
+        presalePrice = campaigns[_campaignID].presalePrice;
+        postsalePrice = campaigns[_campaignID].postsalePrice;
+        return (manager, startingTime, endingTime, balance, goal, state, donersAddresses, ipfsHash, presalePrice, postsalePrice);
     }
 }

@@ -33,6 +33,8 @@ contract('CampaignManager', function (accounts) {
     const validDonation = ether(5);
     const goal = ether(10)
     const ipfsHash = "QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE"
+    const presalePrice = 1;
+    const postsalePrice = 2;
 
 
     before(async function () {
@@ -58,7 +60,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Create Campaign only allows valid inputs', async () => {
         // Valid inputs should add a new entry to the array
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         let campaignCount = await campaignManager.campaignCount()
@@ -79,9 +81,11 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[5]['c'][0], 0, "State should be set to not started(0)")
         assert.equal(campaignValues[6].length, 0, "There should be no contributers")
         assert.equal(campaignValues[7], ipfsHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[8], presalePrice, "presalePrice hash should be correct")
+        assert.equal(campaignValues[9], postsalePrice, "postsalePrice hash should be correct")
 
         //check that if the start time is after the end time (swapped start and end times) constructor throws
-        await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
 
@@ -89,7 +93,7 @@ contract('CampaignManager', function (accounts) {
         // the construction of a new campaign should still thow
         startingTime = 100
         endingTime = 150
-        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
 
@@ -101,7 +105,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Funding Campaign only allows valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -137,7 +141,7 @@ contract('CampaignManager', function (accounts) {
     })
     it('Reduce Donation should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -196,7 +200,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Withdraw Campaign Funds should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -241,7 +245,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Refund Failed Campaign should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         //The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -279,7 +283,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Update IPFS Hash should only alow valid inputs', async () => {
         // First, we need a campaign to test against
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
         // The campaignID is the zeroth position in the array as we have added exactly 1 campaign
@@ -310,7 +314,7 @@ contract('CampaignManager', function (accounts) {
 
     it('Emergency Stops should stop associated functionality', async () => {
         // Standard creation of a campaign should be fine
-        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         })
 
@@ -328,7 +332,7 @@ contract('CampaignManager', function (accounts) {
         await campaignManager.enableEmergencyStop_Creation({
             from: owner
         })
-        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, {
+        await expectThrow(campaignManager.createCampaign(startingTime, endingTime, goal, ipfsHash, presalePrice, postsalePrice, {
             from: manager
         }), EVMRevert);
     })
