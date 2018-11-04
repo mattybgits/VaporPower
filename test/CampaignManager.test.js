@@ -78,11 +78,10 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[2]['c'][0], endingTime, "Manager should have been set")
         assert.equal(campaignValues[3]['c'][0], 0, "Balance should be zero")
         assert.equal(campaignValues[4]['c'][0], goal['c'][0], "Goal should be set correctly")
-        assert.equal(campaignValues[5]['c'][0], 0, "State should be set to not started(0)")
-        assert.equal(campaignValues[6].length, 0, "There should be no contributers")
-        assert.equal(campaignValues[7], ipfsHash, "IPFS hash should be correct")
-        assert.equal(campaignValues[8], presalePrice, "presalePrice hash should be correct")
-        assert.equal(campaignValues[9], postsalePrice, "postsalePrice hash should be correct")
+        assert.equal(campaignValues[5].length, 0, "There should be no contributers")
+        assert.equal(campaignValues[6], ipfsHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[7], presalePrice, "presalePrice hash should be correct")
+        assert.equal(campaignValues[8], postsalePrice, "postsalePrice hash should be correct")
 
         //check that if the start time is after the end time (swapped start and end times) constructor throws
         await expectThrow(campaignManager.createCampaign(endingTime, startingTime, goal, ipfsHash, presalePrice, postsalePrice, {
@@ -127,9 +126,8 @@ contract('CampaignManager', function (accounts) {
         let campaignValues = await campaignManager.fetchCampaign.call(campaignID)
 
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
-        assert.equal(campaignValues[5]['c'][0], 1, "State should be set to Started(1)")
-        assert.equal(campaignValues[6].length, 1, "There should be 1 funder")
-        assert.equal(campaignValues[6][0], funder1, "Only Funder address should be funder1")
+        assert.equal(campaignValues[5].length, 1, "There should be 1 funder")
+        assert.equal(campaignValues[5][0], funder1, "Only Funder address should be funder1")
 
         // // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
         // await increaseTimeTo(afterEndingTime);
@@ -234,9 +232,6 @@ contract('CampaignManager', function (accounts) {
             from: manager
         });
 
-        campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[5]['c'][0], 2, "State should be set to Funded(2)")
-
         // Ensure that the manager can't withdraw twice from the same campaign
         await expectThrow(campaignManager.withdrawCampaignFunds(campaignID, {
             from: manager
@@ -295,7 +290,7 @@ contract('CampaignManager', function (accounts) {
             from: manager
         })
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[7], newHash, "IPFS hash should be correct")
+        assert.equal(campaignValues[6], newHash, "IPFS hash should be correct")
 
         let mollyHash = "BAD HASH"
         // Someone who is NOT the manager should not be able to change the hash
@@ -303,7 +298,7 @@ contract('CampaignManager', function (accounts) {
             from: funder1
         }), EVMRevert);
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
-        assert.equal(campaignValues[7], newHash, "IPFS hash should NOT have changed from the one set by the manager")
+        assert.equal(campaignValues[6], newHash, "IPFS hash should NOT have changed from the one set by the manager")
 
         // Lastly check that the hash cant be changed after the campain has started
         await increaseTimeTo(duringCampaignTime);

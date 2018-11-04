@@ -14,9 +14,7 @@ import "./Proxy.sol";
 */
 contract CampaignManager is Ownable, Proxy{
     /** @dev store the current state of the Camaign. 
-    */
-    enum State{NotStarted, Running, Funded, UnderFunded}
-    
+    */    
     
     /** @dev define the standard properties of a Campaign 
     * @notice the doners are a mapping of addresses to uints. This enables each
@@ -32,7 +30,6 @@ contract CampaignManager is Ownable, Proxy{
         uint endingTime;
         uint balance;
         uint goal;
-        State state;
         mapping(address=>int[]) doners;
         address[] donersAddresses;
         string ipfsHash;
@@ -124,15 +121,15 @@ contract CampaignManager is Ownable, Proxy{
         _;
     }
 
-    /**
-    * @dev checks if a campain has been funded, and therefore paid out. 
-    * @notice This assertion prevents manager's from withdrawing twice from a fund.
-    * @param _campaignID unique identifer of the campaign
-    */
-    modifier campaignNotFunded(uint _campaignID){
-        require(campaigns[_campaignID].state != State.Funded,"The state of the campaign must be not funded to define an unfunded campaign");
-        _;
-    }
+    // /**
+    // * @dev checks if a campain has been funded, and therefore paid out. 
+    // * @notice This assertion prevents manager's from withdrawing twice from a fund.
+    // * @param _campaignID unique identifer of the campaign
+    // */
+    // modifier campaignNotFunded(uint _campaignID){
+    //     require(campaigns[_campaignID].state != State.Funded,"The state of the campaign must be not funded to define an unfunded campaign");
+    //     _;
+    // }
     
     /**
     * @dev Verify that the donation will not cause the campaign to drop below
@@ -215,11 +212,21 @@ contract CampaignManager is Ownable, Proxy{
     * @dev Checks funding value
     */
     modifier validPrice(uint _campaignID){
-        if (campaigns[_campaignID].state == State.Running) {
+        if (campaigns[_campaignID].balance <= campaigns[_campaignID].goal) {
             require(msg.value >= campaigns[_campaignID].presalePrice, "The value needs to exceed the presale price");
-        } else if (campaigns[_campaignID].state == State.Funded || campaigns[_campaignID].state == State.UnderFunded) {
-            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the presale price");
+        } else if (campaigns[_campaignID].balance >= campaigns[_campaignID].goal) {
+            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
+        } else if (campaigns[_campaignID].endingTime >= now) {
+            require(msg.value >= campaigns[_campaignID].postsalePrice, "The value needs to exceed the postsale price");
         }
+        _;
+    }
+
+    /**
+    * @dev Checks whether the presale is over
+    */
+    modifier PresaleOver(uint _campaignID){
+        require(campaigns[_campaignID].balance >= campaigns[_campaignID].goal || now > campaigns[_campaignID].endingTime, "Presale still in session");
         _;
     }
     
@@ -272,7 +279,6 @@ contract CampaignManager is Ownable, Proxy{
             endingTime: _endingTime,
             balance: 0,
             goal: _goal,
-            state: State.NotStarted,
             donersAddresses: emptydonersAddresses,
             ipfsHash: _ipfsHash,
             presalePrice: _presalePrice,
@@ -304,9 +310,6 @@ contract CampaignManager is Ownable, Proxy{
         // if(campaigns[_campaignID].doners[msg.sender].length==0){
         campaigns[_campaignID].donersAddresses.push(msg.sender);         
         // }
-        if (campaigns[_campaignID].state != State.Running){
-            campaigns[_campaignID].state = State.Running;
-        }
     }
     
     /**
@@ -344,14 +347,13 @@ contract CampaignManager is Ownable, Proxy{
         public
         onlyManager(_campaignID)
         campaignEnded(_campaignID)
-        campaignSucceeded(_campaignID)
-        campaignNotFunded(_campaignID)
+        // campaignSucceeded(_campaignID)
+        // campaignNotFunded(_campaignID)
     {
         // Note that we dont have to change the balance of the campaign as we
         // prevent double withdraws by checking the state of the campaign. 
         // Leaving the balance within the campaign enables an easy way to sender
         // the total funds sent to the campaign.
-        campaigns[_campaignID].state = State.Funded;
         msg.sender.transfer(campaigns[_campaignID].balance);
     }
     
@@ -405,7 +407,6 @@ contract CampaignManager is Ownable, Proxy{
         uint endingTime,
         uint balance,
         uint goal,
-        State state,
         address[] donersAddresses,
         string ipfsHash,
         uint presalePrice,
@@ -416,11 +417,10 @@ contract CampaignManager is Ownable, Proxy{
         endingTime = campaigns[_campaignID].endingTime;
         balance = campaigns[_campaignID].balance;
         goal = campaigns[_campaignID].goal;
-        state = campaigns[_campaignID].state;
         donersAddresses = campaigns[_campaignID].donersAddresses;
         ipfsHash = campaigns[_campaignID].ipfsHash;
         presalePrice = campaigns[_campaignID].presalePrice;
         postsalePrice = campaigns[_campaignID].postsalePrice;
-        return (manager, startingTime, endingTime, balance, goal, state, donersAddresses, ipfsHash, presalePrice, postsalePrice);
+        return (manager, startingTime, endingTime, balance, goal, donersAddresses, ipfsHash, presalePrice, postsalePrice);
     }
 }
