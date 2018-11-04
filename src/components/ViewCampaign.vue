@@ -147,7 +147,7 @@ export default {
       console.log("Contract data")
       console.log(this.contractReturnedData)
       this.ipfsReturnedData = await viewFile(this.contractReturnedData[7]);
-      console.log(ipfsReturnedData)
+      console.log(this.ipfsReturnedData)
       //update the display for the time every second
       setInterval(
         function() {
@@ -172,7 +172,7 @@ export default {
         balance = "0 Ether";
       }
 
-      let funders = this.contractReturnedData[7];
+      let funders = this.contractReturnedData[6];
       let fundersString = "";
       if (funders == [] || funders == "") {
         fundersString = "None yet...";
@@ -201,10 +201,10 @@ export default {
       );
 
       this.tableData = [
-        { propery: "Campaign Country", value: this.ipfsReturnedData.country },
-        { propery: "Funding Date", value: this.date },
-        { propery: "Goal", value: this.ipfsReturnedData.goalCap[0] + " Ether" },
-        { propery: "Cap", value: this.ipfsReturnedData.goalCap[1] + " Ether" },
+        { propery: "Funding Period", value: this.date },
+        { propery: "Presale Goal", value: this.ipfsReturnedData.goalCap + " Ether" },
+        { propery: "Presale Price", value: this.ipfsReturnedData.minPresalePrice + " Ether" },
+        { propery: "Mainsale Price", value: this.ipfsReturnedData.minMainsalePrice + " Ether" },
         { propery: "Type", value: type },
         { propery: "Manager", value: manager },
         { propery: "Campaign Balance", value: balance },
@@ -308,7 +308,7 @@ export default {
     },
     async identifyIfContributer() {
       if (
-        this.contractReturnedData[7].indexOf(
+        this.contractReturnedData[6].indexOf(
           this.$store.state.defaultEthWallet.toLowerCase()
         ) > -1
       ) {
