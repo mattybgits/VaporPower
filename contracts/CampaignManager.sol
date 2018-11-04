@@ -329,6 +329,14 @@ contract CampaignManager is Ownable, Proxy{
         // preserving a history of reductions. The sum of this array is their
         // respective donation
         campaigns[_campaignID].doners[msg.sender].push(-int(_value));
+        uint licenses = computeLicenses(_value, campaigns[_campaignID].presalePrice);
+        if (licenses * campaigns[_campaignID].presalePrice <= _value){
+            if (licenses < fetchCampaignLicenses(_campaignID, msg.sender)) {
+                campaigns[_campaignID].licenses[msg.sender] -= (licenses + 1);
+            } else {
+                campaigns[_campaignID].licenses[msg.sender] -= licenses;
+            }
+        }
         msg.sender.transfer(_value); //refund the user for the Ether they sent in
     }
     

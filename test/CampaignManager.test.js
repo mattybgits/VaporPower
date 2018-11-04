@@ -130,14 +130,14 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[5][0], funder1, "Only Funder address should be funder1")
 
         let campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
-        assert.equal(campaignLicenses, 1, "Funder 1 has one license")
+        assert.equal(campaignLicenses, 1, "Funder 1 does not have 1 license")
 
         await campaignManager.fundCampaign(campaignID, {
             from: funder1,
-            value: validDonation
+            value: validDonation * 2
         })
         campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
-        assert.equal(campaignLicenses, 2, "Funder 1 has two license")
+        assert.equal(campaignLicenses, 3, "Funder 1 does not have 3 licenses")
 
 
         // // Next, we set the time to after the funding period is done and once again try to fund the campaign. should not alow this
@@ -166,12 +166,18 @@ contract('CampaignManager', function (accounts) {
         assert.equal(campaignValues[3]['c'][0], validDonation['c'][0], "Balance should be equal to the donation amount")
         //Next, we want to reduce our donation by a set amount and check we get the ether back correctly and that the fund is reduced
 
+        let campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
+        assert.equal(campaignLicenses, 1, "Funder 1 does not have 1 license")
+
         let responce = await campaignManager.reduceDontation(campaignID, (validDonation / 2), {
             from: funder1
         })
         
         campaignValues = await campaignManager.fetchCampaign.call(campaignID)
         assert.equal(campaignValues[3]['c'][0], (validDonation['c'][0]) / 2, "Balance should be equal to the half the original donation amount")
+
+        campaignLicenses = await campaignManager.fetchCampaignLicenses.call(campaignID, funder1);
+        assert.equal(campaignLicenses.toNumber(), 0, "Funder 1 does not have 0 license")
 
         // Need to check that the user cant withdraw more than they deposited. At this point, the user balance should be 2.5 ether. 
         // Withdrawing by another validDonation should make their balance negative. this should get rejected
