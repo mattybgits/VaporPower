@@ -24,17 +24,11 @@
         <img class="preview" :src="ipfsReturnedData.imageData">
         <br>
         <br>
-        <el-col :span="12">
+        <el-col :span="24">
           <el-progress type="circle" :percentage="goalPercentage"></el-progress>
           <br>
           goal
         </el-col>
-    <el-col :span="12">
-      <el-progress type="circle" :percentage="capPercentage"></el-progress>
-      <br>
-      cap
-    </el-col>
-
   </el-col>
   <el-col :span="16">
           <el-table
