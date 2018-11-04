@@ -180,9 +180,9 @@ export default {
         startTime,
         endTime,
         presaleGoal,
+        createdAddress,
         presaleCostPerToken,
         mainSaleCostPerToken,
-        createdAddress
       );
     },
     async loadHash() {

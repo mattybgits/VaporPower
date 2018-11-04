@@ -15,17 +15,19 @@ if (typeof web3 !== 'undefined') {
 let contractInstance
 
 const loadCampaignManager = async (c) => {
-    contractInstance = await Contract.at("0x2AD029C19eEaD01C589Dc48BA83229e845213744")
+    contractInstance = await Contract.at("0xb32c941dc0cf4977d9efedd9e1dda53bf6ddf13b")
     console.log("Contract Loaded")
 }
 
 
-const createNewCampaign = async (_startingTime, _endingTime, _goal, _cap, _ipfsHash) => {
+const createNewCampaign = async (_startingTime, _endingTime, _goal, _ipfsHash, _presalePrice, _postsalePrice) => {
     return await contractInstance.createCampaign(_startingTime,
         _endingTime,
         _goal * 1000000000000000000,
-        _cap * 1000000000000000000,
-        _ipfsHash, {
+        _ipfsHash,
+        _presalePrice * 1000000000000000000,
+        _postsalePrice * 1000000000000000000,
+        {
             from: store.state.defaultEthWallet,
             gasPrice: 2000000000,
             gas: '2000000'
